@@ -192,7 +192,7 @@ Este projeto prediz **taxa de turnover em percentual**, não quantidade absoluta
 
 ---
 
-## 📊 Interpretação de Resultados
+## Interpretação de Resultados
 
 ### Feature Importance
 ```
@@ -215,53 +215,10 @@ Visualiza contribuição de cada feature para previsão individual. Disponível 
 - Distribuição de residuais (normalidade)
 - Q-Q Plot (comparação com normal)
 
----
-
-## 🧪 Testes
-
-```powershell
-# Ativar venv primeiro
-.\.venv\Scripts\Activate
-
-# Rodar todos os testes
-pytest
-
-# Rodar com cobertura
-pytest --cov=src tests/
-
-# Teste específico
-pytest tests/test_pipeline.py -v
-```
 
 ---
 
-## 🛠️ Boas Práticas de Desenvolvimento
-
-### Git e Versionamento
-- ❌ Não commit: `data/`, `models/`, `reports/` (já ignorados em `.gitignore`)
-- Sim commit: código fonte, notebooks, documentação, requirements.txt
-
-Se acidentalmente comitou arquivos grandes:
-```powershell
-git rm -r --cached data models reports
-git add .gitignore
-git commit -m "Remove data, models and reports from tracking"
-git push
-```
-
-### Ambiente Virtual
-- Sempre trabalhe dentro do `.venv`
-- Atualize `requirements.txt` quando adicionar pacotes
-- Use `pip freeze > requirements.txt` para exportar
-
-### Reprodutibilidade
-- Use `random_state=1` em modelos (já feito no código)
-- Salve versões de modelos com timestamps
-- Documente versões de dependências (Python 3.8+, XGBoost 1.7+, etc)
-
----
-
-## 📚 Estrutura de Saídas
+## Estrutura de Saídas
 
 ### `reports/` - Outputs do Pipeline
 
@@ -304,101 +261,24 @@ mes_ref,area,valor_real,valor_predito,erro_absoluto,erro_percentual
 
 ---
 
-## 🔬 Validação Temporal (Walk-Forward)
+## Validação Temporal (Walk-Forward)
 
 O pipeline usa **validação temporal** apropriada para séries:
 
-```python
-# Split 80/20 cronológico (não aleatório!)
-split_idx = int(len(df) * 0.8)
-train_period = antes dessa data
-test_period = depois dessa data
-```
 
-⚠️ **Importante:** Dados futuros nunca "vêem" dados passados de teste (prevenção de leakage)
+
+
 
 ---
 
-## 📖 Documentação Adicional
-
-- **`METODOLOGIA_TURNOVER_ANALISE.md`** — Análise aprofundada de % vs quantidade, referências acadêmicas, benchmarks
-- **`TIME_SERIES_MODELS.md`** — Documentação técnica de modelos ARIMA, Prophet, ETS
-- **`GUIA_ARTIGO.md`** — Guia para escrita de artigo científico com resultados
 
 ---
 
-## 🤝 Contribuindo
+## 📧 Autores 
 
-1. Faça um fork do repositório
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-analise`)
-3. Commit suas mudanças (`git commit -m 'Add nova análise'`)
-4. Push para a branch (`git push origin feature/nova-analise`)
-5. Abra um Pull Request
+- **Juliana Alves**
+- **Marcus  Rodrigues**
 
----
 
-## 📝 Licença
 
-[Insira licença aqui - ex: MIT, CC BY 4.0]
-
----
-
-## 📧 Autores e Contato
-
-- **Juliana Alves** - Análise principal
-- Desenvolvido para pesquisa em Ciência de Dados (Faculdade/Empresa)
-
-**GitHub:** [@julianafalves](https://github.com/julianafalves)
-
----
-
-## 🙏 Agradecimentos
-
-- Dados fornecidos por [Empresa/Instituição]
-- Pesquisa Fala AI para propensão individual
-- Comunidade científica (referências em METODOLOGIA_TURNOVER_ANALISE.md)
-
----
-
-## 📌 Changelog
-
-### v2.0 (Atual)
-- Pipeline completo com 7 modelos
-- Feature engineering avançado (lags + sazonalidade)
-- Validação temporal
-- SHAP interpretation
-- Análise agregada vs individual
-- Sem data leakage
-
-### v1.0
-- Baseline XGBoost
-- Predição por área
-- Feature importance simples
-
----
-
-## ⚡ Quick Start
-
-Para rodar o pipeline completo em < 5 min:
-
-```powershell
-# Setup
-python -m venv .venv
-.\.venv\Scripts\Activate
-pip install -r requirements.txt
-
-# Rodar
-python pipeline_turnover_v2.py
-
-# Ver resultados
-# Abra: reports/model_comparison_v2.json
-#       reports/predictions_v2.csv
-#       reports/*.png
-```
-
-**Próximas análises:**
-- [ ] Comparação detalhada com análise individual (Fala AI)
-- [ ] Dashboard interativo (Streamlit/Plotly)
-- [ ] API de predição em tempo real
-- [ ] Análise causal (econometric models)
 
