@@ -30,11 +30,8 @@ Este repositório implementa um **pipeline completo de previsão de turnover** c
 ```
 time-series-turnover-prediction/
 ├── data/                          # Dados brutos e preparados
-│   ├── juliana_alves_turnover_with_label.csv
-│   ├── juliana_alves_turnover_and_fala_ai_annon_with_label.csv
-│   ├── prepared.joblib            # Dados preprocessados
-│   ├── prepared_no_leakage.joblib # Versão sem data leakage
-│   ├── preprocessor.joblib        # Scaler e encoders
+│   ├── turnover_with_label.csv
+│   ├── turnover_and_fala_ai_annon_with_label.csv
 │   └── *.csv
 ├── models/                        # Modelos treinados
 │   ├── xgb_turnover.joblib       # Principal (XGBoost)
@@ -43,9 +40,8 @@ time-series-turnover-prediction/
 │   ├── scaler.joblib             # StandardScaler
 │   └── *.metrics.json
 ├── src/                           # Código fonte
-│   └── turnover_prediction/
-│       ├── __init__.py
-│       └── utils.py
+│   └── pipeline_turnover_v2.py       # Pipeline principal
+│   ├── __init__.py
 ├── notebooks/                     # Análises interativas
 │   └── individual_turnover_predictions.ipynb
 ├── reports/                       # Outputs e visualizações
@@ -55,16 +51,7 @@ time-series-turnover-prediction/
 │   ├── plot_actual_vs_predicted_v2.png
 │   ├── plot_feature_importance_v2.png
 │   └── shap_importance_v2.png
-├── scripts/                       # Utilidades
-│   ├── setup_venv.ps1
-│   ├── cleanup.sh
-│   └── cleanup_synthetic.ps1
-├── tests/                         # Testes
-│   ├── test_pipeline.py
-│   └── test_benchmark.py
-├── pipeline_turnover_v2.py       # Pipeline principal
 ├── requirements.txt
-├── METODOLOGIA_TURNOVER_ANALISE.md
 ├── README.md
 └── .gitignore
 ```
