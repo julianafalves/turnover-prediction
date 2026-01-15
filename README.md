@@ -92,8 +92,8 @@ python -m pip install -r requirements.txt
 
 | Arquivo | Descrição | Campos Obrigatórios |
 |---------|-----------|-------------------|
-| `juliana_alves_turnover_with_label.csv` | Histórico de turnover por período/área | `MES_REF`, `area_anonn`, `TO_TURNOVER_TO-GERAL`, `TO_HEADCOUNT_HEADCOUNT-MES-ATUAL`, `TO_ADMISSOES_ADMISSOES-MES-ATUAL` |
-| `juliana_alves_turnover_and_fala_ai_annon_with_label.csv` | Dados diários Fala AI + labels | `pseudo_person_id`, `year_month`, respostas de pesquisa, rótulo de desligamento |
+| `turnover_with_label.csv` | Histórico de turnover por período/área | `MES_REF`, `area_anonn`, `TO_TURNOVER_TO-GERAL`, `TO_HEADCOUNT_HEADCOUNT-MES-ATUAL`, `TO_ADMISSOES_ADMISSOES-MES-ATUAL` |
+| `turnover_and_fala_ai_annon_with_label.csv` | Dados diários Fala AI + labels | `pseudo_person_id`, `year_month`, respostas de pesquisa, rótulo de desligamento |
 
 ---
 
