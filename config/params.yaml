@@ -1,0 +1,132 @@
+# =============================================================================
+# PIPELINE DE PREDIÇÃO DE TURNOVER - ARQUIVO DE CONFIGURAÇÃO
+# =============================================================================
+# Este arquivo YAML contém todos os parâmetros de configuração para o pipeline
+# de predição de turnover. Modifique estes parâmetros para ajustar fontes de dados,
+# engenharia de atributos, seleção de modelos e comportamento do treinamento.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# CONFIGURAÇÕES DO PROJETO
+# -----------------------------------------------------------------------------
+project:
+  name: "Pipeline de Predição de Turnover V2"
+  random_seed: 42  # Semente para reprodutibilidade em todas as operações aleatórias
+
+# -----------------------------------------------------------------------------
+# CONFIGURAÇÃO DE DADOS
+# -----------------------------------------------------------------------------
+# Configurações para carregamento e pré-processamento do conjunto de dados brutos
+data:
+  # Caminho do arquivo de entrada (relativo à raiz do projeto)
+  input_path: "data/turnover_with_label.csv"
+  
+  # Nomes das colunas no conjunto de dados
+  target_col: "TO_TURNOVER_TO-GERAL"  # Variável alvo a prever (taxa de turnover)
+  date_col: "MES_REF"                  # Coluna de data de referência para série temporal
+  area_col: "area_anonn"               # Coluna de agrupamento (área/unidade de negócio anonimizada)
+  
+  # Mapeamento para renomeação de colunas
+  # Mapeia nomes originais para nomes padronizados e legíveis
+  # Isso melhora a legibilidade do código e a consistência em todo o pipeline
+  rename_map:
+    TO_HEADCOUNT_HEADCOUNT-MES-ATUAL: "headcount"      # Headcount do mês atual
+    TO_ADMISSOES_ADMISSOES-MES-ATUAL: "admissions"     # Admissões do mês atual
+
+  # Colunas a serem removidas do conjunto de dados
+  # Estas são removidas para evitar vazamento de dados e proteger a privacidade
+  drop_cols:
+    # === COLUNAS DE VAZAMENTO (LEAKAGE) ===
+    # Estas colunas contêm informações do mês atual que revelariam
+    # o valor alvo, causando um desempenho irrealista do modelo
+    - "TO_DESLIGAMENTO_DESLIGAMENTO-MES-ATUAL"            # Desligamentos do mês atual
+    - "TO_DESLIGAMENTO_DESLIGAMENTO-VOLUNTARIO-MES-ATUAL"  # Desligamentos voluntários
+    - "TO_DESLIGAMENTO_DESLIGAMENTO-INVOLUNTARIO-MES-ATUAL" # Desligamentos involuntários
+    - "TO_DESLIGAMENTO_DESLIGAMENTO-VOL-HEAD-LT-25"       # Desligamentos voluntários (headcount < 25)
+    - "TO_TURNOVER_TO-VOL-HEAD-GT-25"                     # Turnover voluntário (headcount > 25)
+    - "TO_TURNOVER_TO-VOL"                                # Taxa de turnover voluntário
+    - "TO_TURNOVER_TO-INVOL"                              # Taxa de turnover involuntário
+    
+    # === DADOS PESSOAIS / IDENTIFICADORES ===
+    # Estas colunas contêm informações de identificação pessoal (PII)
+    # e são removidas por razões de privacidade e conformidade (LGPD)
+    - "EMAILADDRESS_AREA_RES"  # Endereços de e-mail
+    - "LIDER_IFOOD"            # Identificação do líder/gestor
+    - "VP_BU"                  # Identificação da Vice-Presidência / Unidade de Negócio
+
+# -----------------------------------------------------------------------------
+# CONFIGURAÇÃO DE ENGENHARIA DE ATRIBUTOS
+# -----------------------------------------------------------------------------
+# Configurações para criação de atributos de séries temporais
+features:
+  # Períodos de Lag (atraso) a serem criados
+  # Para cada período N, cria: target_lag_N, headcount_lag_N, admissions_lag_N
+  # Estes capturam padrões históricos e dependências temporais
+  lags: [1, 3, 6]  # Lags de 1 mês, 3 meses e 6 meses
+  
+  # Atributos de Momento
+  # Quando verdadeiro, cria atributos de taxa de crescimento (diferença do mês anterior)
+  # Captura a taxa de mudança em métricas operacionais
+  use_momentum: true  # Habilita o cálculo de headcount_growth_1m e admissions_growth_1m
+
+# -----------------------------------------------------------------------------
+# CONFIGURAÇÃO DE TREINAMENTO
+# -----------------------------------------------------------------------------
+# Configurações para treinamento e validação do modelo
+training:
+  # Número de divisões (splits) para a validação cruzada walk-forward
+  # Cada divisão representa uma janela de treino/teste no tempo
+  # Valores mais altos = validação mais robusta, mas tempo de treino mais longo
+  n_splits: 5  # Cria 5 divisões temporais de treino/teste
+  
+  # Métrica de pontuação para otimização de hiperparâmetros
+  # Usada pelo RandomizedSearchCV para selecionar os melhores hiperparâmetros
+  # Opções: 'neg_mean_absolute_error', 'neg_mean_squared_error', 'r2', etc.
+  scoring: "neg_mean_absolute_error"  # Minimiza o MAE (quanto menor, melhor)
+
+# -----------------------------------------------------------------------------
+# CONFIGURAÇÃO DE MODELOS
+# -----------------------------------------------------------------------------
+# Configurações para cada modelo de machine learning a ser treinado
+# Defina 'enabled: false' para pular um modelo durante o treinamento
+models:
+  # === XGBOOST REGRESSOR ===
+  # Algoritmo de árvore de decisão com gradient boosting
+  # Conhecido pelo forte desempenho em dados estruturados/tabulares
+  xgboost:
+    enabled: true  # Defina como false para desabilitar este modelo
+    n_iter: 20     # Número de combinações de hiperparâmetros a testar
+    params:
+      n_estimators: [100, 200, 300]    # Número de rodadas de boosting (árvores)
+      max_depth: [3, 5, 7]             # Profundidade máxima da árvore (controla complexidade)
+      learning_rate: [0.01, 0.1, 0.2]  # Tamanho do passo (menor = mais conservador)
+  
+  # === RANDOM FOREST REGRESSOR ===
+  # Conjunto (ensemble) de árvores de decisão com bagging
+  # Robusto e menos propenso a overfitting que árvores individuais
+  random_forest:
+    enabled: true
+    n_iter: 10
+    params:
+      n_estimators: [100, 200]  # Número de árvores na floresta
+      max_depth: [10, 20, null] # Profundidade máxima (null = ilimitada)
+  
+  # === GRADIENT BOOSTING REGRESSOR ===
+  # Implementação de gradient boosting do Scikit-learn
+  # Semelhante ao XGBoost, mas com abordagem de otimização diferente
+  gradient_boosting:
+    enabled: true
+    n_iter: 10
+    params:
+      n_estimators: [100, 200]    # Número de estágios de boosting
+      max_depth: [3, 5]           # Profundidade máxima da árvore
+      learning_rate: [0.05, 0.1]  # Taxa de aprendizado
+      
+  # === RIDGE REGRESSION ===
+  # Regressão linear com regularização L2
+  # Útil como modelo de linha de base (baseline) e pela interpretabilidade
+  ridge:
+    enabled: true
+    n_iter: 10
+    params:
+      alpha: [0.1, 1.0, 10.0]  # Força da regularização (maior = mais regularização)
